@@ -56,9 +56,46 @@ import fileinput
 
 #     return patterns
 
+sum = 0
 
 for line in fileinput.input():
     signals, output = line.strip().split(" | ")
     # print("{} => {}".format(signals, output))
     d = {l: set(s) for s in signals.split() if (l := len(s)) in {2, 4}}
-    print(d)
+    # print(d)
+
+    result = ""
+    for o in output.split():
+        l = len(o)
+
+        if l == 2:
+            result += "1"
+        elif l == 4:
+            result += "4"
+        elif l == 3:
+            result += "7"
+        elif l == 7:
+            result += "8"
+        elif l == 5:
+            s = set(o)
+
+            if len(s & d[2]) == 2:
+                result += "3"
+            elif len(s & d[4]) == 2:
+                result += "2"
+            else:
+                result += "5"
+        elif l == 6:
+            s = set(o)
+
+            if len(s & d[2]) == 1:
+                result += "6"
+            elif len(s & d[4]) == 4:
+                result += "9"
+            else:
+                result += "0"
+
+    # print(result)
+    sum += int(result)
+
+print(sum)
