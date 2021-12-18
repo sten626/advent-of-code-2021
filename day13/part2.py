@@ -1,5 +1,4 @@
 import fileinput
-import pprint
 import re
 
 dot_pattern = re.compile("(\d+),(\d+)")
@@ -54,5 +53,5 @@ for y in range(max_y + 1):
 
     paper.append(row)
 
-pp = pprint.PrettyPrinter(indent=2, width=max_x, depth=3)
-pp.pprint(paper)
+for row in paper:
+    print(row)
