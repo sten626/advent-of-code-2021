@@ -5,12 +5,28 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python: Current File",
+            "name": "Python: Sample File",
             "type": "python",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "args": ["${relativeFileDirname}/sample.txt"]
+        },
+        {
+            "name": "Python: Sample File 2",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["${relativeFileDirname}/sample2.txt"]
+        },
+        {
+            "name": "Python: Sample File 3",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "args": ["${relativeFileDirname}/sample3.txt"]
         }
     ]
 }

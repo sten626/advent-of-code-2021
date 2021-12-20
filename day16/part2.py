@@ -1,9 +1,17 @@
 import fileinput
-from bitstring import BitArray, BitStream, pack
+from bitstring import BitArray, BitStream
+from math import prod
 
 
 class Packets:
+    op_sum = 0
+    op_prod = 1
+    op_min = 2
+    op_max = 3
     op_literal = 4
+    op_gt = 5
+    op_lt = 6
+    op_eq = 7
 
     def __init__(self, bitstream) -> None:
         self._bitstream = bitstream
@@ -39,7 +47,7 @@ class Packets:
             bit_length += 15
 
             while subpacket_lengths > 0:
-                packet, packet_bit_length = self.next()
+                packet, packet_bit_length = self._next()
                 subpackets.append(packet)
                 bit_length += packet_bit_length
                 subpacket_lengths -= packet_bit_length
@@ -48,14 +56,14 @@ class Packets:
             bit_length += 11
 
             while n_subpackets > 0:
-                packet, packet_bit_length = self.next()
+                packet, packet_bit_length = self._next()
                 subpackets.append(packet)
                 bit_length += packet_bit_length
                 n_subpackets -= 1
 
         return subpackets, bit_length
 
-    def next(self):
+    def _next(self):
         version, type_id = self._get_header()
 
         if type_id == Packets.op_literal:
@@ -64,6 +72,39 @@ class Packets:
         else:
             subpackets, bit_length = self._get_subpackets()
             return (version, type_id, subpackets), bit_length + 6
+
+    def result(self):
+        def _result(packet):
+            (_, type_id, value) = packet
+
+            if type_id == Packets.op_literal:
+                return value
+
+            subpacket_results = (_result(packet) for packet in value)
+
+            if type_id == Packets.op_sum:
+                return sum(subpacket_results)
+            if type_id == Packets.op_prod:
+                return prod(subpacket_results)
+            if type_id == Packets.op_min:
+                return min(subpacket_results)
+            if type_id == Packets.op_max:
+                return max(subpacket_results)
+
+            first = next(subpacket_results)
+            second = next(subpacket_results)
+
+            if type_id == Packets.op_gt:
+                return 1 if first > second else 0
+            if type_id == Packets.op_lt:
+                return 1 if first < second else 0
+            if type_id == Packets.op_eq:
+                return 1 if first == second else 0
+
+            raise RuntimeError("Unknown type_id {}".format(type_id))
+
+        packet, _ = self._next()
+        return _result(packet)
 
 
 def parse_file():
@@ -82,5 +123,4 @@ def version_sum(root_packet):
 hex_input = parse_file()
 stream = BitStream("0x" + hex_input)
 packets = Packets(stream)
-packet, _ = packets.next()
-print(version_sum(packet))
+print(packets.result())
